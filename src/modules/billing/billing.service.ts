@@ -3,18 +3,18 @@ import {
   Inject,
   NotFoundException,
   BadRequestException,
-} from '@nestjs/common';
-import { and, eq } from 'drizzle-orm';
-import Stripe = require('stripe');
-import { DRIZZLE, DrizzleDB } from '../../database.module';
-import { plans, subscriptions, users } from '../../database/schema';
+} from "@nestjs/common";
+import { and, eq } from "drizzle-orm";
+import Stripe = require("stripe");
+import { DRIZZLE, DrizzleDB } from "../../database.module";
+import { plans, subscriptions, users } from "../../database/schema";
 
 @Injectable()
 export class BillingService {
   private stripe: Stripe;
 
   constructor(@Inject(DRIZZLE) private db: DrizzleDB) {
-    this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
+    this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "");
   }
 
   private getSubscriptionPeriodEnd(sub: Stripe.Subscription): Date | undefined {
@@ -24,15 +24,15 @@ export class BillingService {
     return new Date(periodEnd * 1000);
   }
 
-  private getInvoiceSubscriptionId(invoice: Stripe.Invoice): string | undefined {
+  private getInvoiceSubscriptionId(
+    invoice: Stripe.Invoice,
+  ): string | undefined {
     const subscription = invoice.parent?.subscription_details?.subscription;
     if (!subscription) return undefined;
-    return typeof subscription === 'string' ? subscription : subscription.id;
+    return typeof subscription === "string" ? subscription : subscription.id;
   }
 
-  private getSubscriptionPriceId(
-    sub: Stripe.Subscription,
-  ): string | undefined {
+  private getSubscriptionPriceId(sub: Stripe.Subscription): string | undefined {
     return sub.items?.data?.[0]?.price?.id;
   }
 
@@ -41,7 +41,7 @@ export class BillingService {
   ): string | undefined {
     const subscription = session.subscription;
     if (!subscription) return undefined;
-    return typeof subscription === 'string' ? subscription : subscription.id;
+    return typeof subscription === "string" ? subscription : subscription.id;
   }
 
   private async getPlanIdByStripePriceId(
@@ -55,11 +55,13 @@ export class BillingService {
     return plan?.id;
   }
 
-  private mapStripeSubscriptionStatus(status: Stripe.Subscription.Status): string {
-    if (status === 'active' || status === 'trialing') return 'active';
-    if (status === 'past_due' || status === 'unpaid') return 'halted';
-    if (status === 'canceled') return 'cancelled';
-    return 'pending';
+  private mapStripeSubscriptionStatus(
+    status: Stripe.Subscription.Status,
+  ): string {
+    if (status === "active" || status === "trialing") return "active";
+    if (status === "past_due" || status === "unpaid") return "halted";
+    if (status === "canceled") return "cancelled";
+    return "pending";
   }
 
   async createSubscription(userId: string, planId: string) {
@@ -68,10 +70,12 @@ export class BillingService {
       .from(plans)
       .where(eq(plans.id, planId))
       .limit(1);
-    if (!plan) throw new NotFoundException('Plan not found');
+    if (!plan) throw new NotFoundException("Plan not found");
 
     if (!plan.stripePriceId) {
-      throw new BadRequestException('This plan does not support Stripe billing');
+      throw new BadRequestException(
+        "This plan does not support Stripe billing",
+      );
     }
 
     const [user] = await this.db
@@ -79,7 +83,7 @@ export class BillingService {
       .from(users)
       .where(eq(users.id, userId))
       .limit(1);
-    if (!user) throw new NotFoundException('User not found');
+    if (!user) throw new NotFoundException("User not found");
 
     let customerId: string;
     const [existingSub] = await this.db
@@ -100,7 +104,7 @@ export class BillingService {
     }
 
     const session = await this.stripe.checkout.sessions.create({
-      mode: 'subscription',
+      mode: "subscription",
       customer: customerId,
       line_items: [{ price: plan.stripePriceId, quantity: 1 }],
       success_url: `${process.env.FRONTEND_URL}/billing/success?session_id={CHECKOUT_SESSION_ID}`,
@@ -113,7 +117,7 @@ export class BillingService {
       .values({
         userId,
         stripeCustomerId: customerId,
-        status: 'pending',
+        status: "pending",
       })
       .onConflictDoUpdate({
         target: subscriptions.userId,
@@ -126,7 +130,7 @@ export class BillingService {
       checkoutUrl: session.url,
       sessionId: session.id,
       planName: plan.name,
-      priceInr: plan.priceInr,
+      priceThb: plan.priceThb,
     };
   }
 
@@ -136,20 +140,21 @@ export class BillingService {
       event = this.stripe.webhooks.constructEvent(
         rawBody,
         signature,
-        process.env.STRIPE_WEBHOOK_SECRET || '',
+        process.env.STRIPE_WEBHOOK_SECRET || "",
       );
     } catch {
-      throw new BadRequestException('Invalid webhook signature');
+      throw new BadRequestException("Invalid webhook signature");
     }
 
     switch (event.type) {
-      case 'checkout.session.completed': {
+      case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
         const userId = session.metadata?.userId;
         const planId = session.metadata?.planId;
-        if (!userId || !planId || session.payment_status !== 'paid') break;
+        if (!userId || !planId || session.payment_status !== "paid") break;
 
-        const stripeSubscriptionId = this.getCheckoutSessionSubscriptionId(session);
+        const stripeSubscriptionId =
+          this.getCheckoutSessionSubscriptionId(session);
         const [plan] = await this.db
           .select({ id: plans.id })
           .from(plans)
@@ -161,17 +166,15 @@ export class BillingService {
           .update(subscriptions)
           .set({
             planId: plan.id,
-            status: 'active',
-            ...(stripeSubscriptionId
-              ? { stripeSubscriptionId }
-              : {}),
+            status: "active",
+            ...(stripeSubscriptionId ? { stripeSubscriptionId } : {}),
           })
           .where(eq(subscriptions.userId, userId));
         break;
       }
 
-      case 'customer.subscription.updated':
-      case 'customer.subscription.created': {
+      case "customer.subscription.updated":
+      case "customer.subscription.created": {
         const sub = event.data.object as Stripe.Subscription;
         const periodEnd = this.getSubscriptionPeriodEnd(sub);
         const stripePriceId = this.getSubscriptionPriceId(sub);
@@ -190,7 +193,7 @@ export class BillingService {
         break;
       }
 
-      case 'invoice.payment_succeeded': {
+      case "invoice.payment_succeeded": {
         const invoice = event.data.object as Stripe.Invoice;
         const subscriptionId = this.getInvoiceSubscriptionId(invoice);
         if (!subscriptionId) break;
@@ -199,24 +202,24 @@ export class BillingService {
         await this.db
           .update(subscriptions)
           .set({
-            status: 'active',
+            status: "active",
             ...(periodEnd ? { currentPeriodEnd: periodEnd } : {}),
           })
           .where(eq(subscriptions.stripeSubscriptionId, sub.id));
         break;
       }
 
-      case 'customer.subscription.deleted': {
+      case "customer.subscription.deleted": {
         const sub = event.data.object as Stripe.Subscription;
         await this.db
           .update(subscriptions)
-          .set({ status: 'cancelled' })
+          .set({ status: "cancelled" })
           .where(eq(subscriptions.stripeSubscriptionId, sub.id));
 
         const [freePlan] = await this.db
           .select({ id: plans.id })
           .from(plans)
-          .where(eq(plans.name, 'Free'))
+          .where(eq(plans.name, "Free"))
           .limit(1);
         if (freePlan) {
           await this.db
@@ -227,60 +230,128 @@ export class BillingService {
         break;
       }
 
-      case 'invoice.payment_failed': {
+      case "invoice.payment_failed": {
         const invoice = event.data.object as Stripe.Invoice;
         const subscriptionId = this.getInvoiceSubscriptionId(invoice);
         if (!subscriptionId) break;
         await this.db
           .update(subscriptions)
-          .set({ status: 'halted' })
+          .set({ status: "halted" })
           .where(eq(subscriptions.stripeSubscriptionId, subscriptionId));
         break;
       }
     }
 
-    return { status: 'ok', event: event.type };
+    return { status: "ok", event: event.type };
   }
 
-  async cancelSubscription(userId: string) {
+  async cancelSubscription(userId: string, immediately = false) {
     const [sub] = await this.db
       .select({ stripeSubscriptionId: subscriptions.stripeSubscriptionId })
       .from(subscriptions)
       .where(
-        and(eq(subscriptions.userId, userId), eq(subscriptions.status, 'active')),
+        and(
+          eq(subscriptions.userId, userId),
+          eq(subscriptions.status, "active"),
+        ),
       )
       .limit(1);
-    if (!sub) throw new NotFoundException('No active subscription');
+    if (!sub.stripeSubscriptionId)
+      throw new NotFoundException("No active subscription");
 
-    if (sub.stripeSubscriptionId) {
+    if (immediately) {
+      await this.stripe.subscriptions.cancel(sub.stripeSubscriptionId);
+    } else {
       await this.stripe.subscriptions.update(sub.stripeSubscriptionId, {
         cancel_at_period_end: true,
       });
     }
 
-    await this.db
+    const [updated] = await this.db
       .update(subscriptions)
-      .set({ status: 'cancelled' })
-      .where(eq(subscriptions.userId, userId));
+      .set({
+        cancelAtPeriodEnd: !immediately,
+        status: immediately ? "canceled" : "active",
+        updatedAt: new Date(),
+      })
+      .where(eq(subscriptions.userId, userId))
+      .returning({
+        status: subscriptions.status,
+        cancelAtPeriodEnd: subscriptions.cancelAtPeriodEnd,
+        currentPeriodEnd: subscriptions.currentPeriodEnd,
+      });
 
-    return { message: 'Subscription cancelled' };
+    return updated;
+  }
+
+  async resumeSubscription(userId: string) {
+    const [sub] = await this.db
+      .select({ stripeSubscriptionId: subscriptions.stripeSubscriptionId })
+      .from(subscriptions)
+      .where(eq(subscriptions.userId, userId))
+      .limit(1);
+
+    if (!sub?.stripeSubscriptionId) {
+      throw new NotFoundException("No subscription for this user");
+    }
+
+    await this.stripe.subscriptions.update(sub.stripeSubscriptionId, {
+      cancel_at_period_end: false,
+    });
+
+    const [updated] = await this.db
+      .update(subscriptions)
+      .set({ cancelAtPeriodEnd: false, updatedAt: new Date() })
+      .where(eq(subscriptions.userId, userId))
+      .returning({ cancelAtPeriodEnd: subscriptions.cancelAtPeriodEnd });
+
+    return updated;
   }
 
   async getCurrentSubscription(userId: string) {
     const [sub] = await this.db
       .select({
         status: subscriptions.status,
-        current_period_end: subscriptions.currentPeriodEnd,
-        stripe_subscription_id: subscriptions.stripeSubscriptionId,
         plan_name: plans.name,
-        price_inr: plans.priceInr,
+        price_thb: plans.priceThb,
         quota: plans.quota,
         features: plans.features,
+        description: plans.description,
+        subscriptionStatus: subscriptions.status,
+        cancelAtPeriodEnd: subscriptions.cancelAtPeriodEnd,
+        currentPeriodEnd: subscriptions.currentPeriodEnd,
       })
       .from(subscriptions)
       .innerJoin(plans, eq(plans.id, subscriptions.planId))
       .where(eq(subscriptions.userId, userId))
       .limit(1);
+
     return sub || null;
+  }
+
+  async listInvoices(userId: string) {
+    const [sub] = await this.db
+      .select({ stripeCustomerId: subscriptions.stripeCustomerId })
+      .from(subscriptions)
+      .where(eq(subscriptions.userId, userId))
+      .limit(1);
+
+    if (!sub?.stripeCustomerId) {
+      throw new BadRequestException("No billing account for this user");
+    }
+
+    const invoices = await this.stripe.invoices.list({
+      customer: sub.stripeCustomerId,
+      limit: 100,
+    });
+
+    return invoices.data.map((invoice) => ({
+      id: invoice.id,
+      amountPaid: invoice.amount_paid,
+      currency: invoice.currency,
+      status: invoice.status,
+      createdAt: new Date(invoice.created * 1000),
+      hostedInvoiceUrl: invoice.hosted_invoice_url,
+    }));
   }
 }
