@@ -12,13 +12,13 @@ export class PlansService {
       .select({
         id: plans.id,
         name: plans.name,
-        price_usd: plans.priceInr,
+        price_thb: plans.priceThb,
         description: plans.description,
         stripe_price_id: plans.stripePriceId,
         quota: plans.quota,
         features: plans.features,
       })
       .from(plans)
-      .orderBy(asc(plans.priceInr));
+      .orderBy(asc(plans.priceThb));
   }
 }

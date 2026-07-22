@@ -20,8 +20,6 @@ export class UserService {
   constructor(@Inject(DRIZZLE) private db: DrizzleDB) { }
 
   async getProfile(userId: string) {
-    console.log(userId);
-
     const [row] = await this.db
       .select(SETTINGS_COLUMNS)
       .from(users)
