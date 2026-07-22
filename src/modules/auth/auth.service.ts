@@ -9,7 +9,7 @@ import * as bcrypt from 'bcrypt';
 import { eq } from 'drizzle-orm';
 import { DRIZZLE, DrizzleDB } from '../../database.module';
 import { plans, subscriptions, users } from '../../database/schema';
-import { RegisterDto, LoginDto } from './dto/auth.dto'; 
+import { RegisterDto, LoginDto } from './dto/request/auth.dto'; 
 import { Response } from 'express';
 
 @Injectable()
