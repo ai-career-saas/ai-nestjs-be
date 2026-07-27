@@ -56,7 +56,7 @@ export const subscriptions = pgTable(
       .references(() => users.id, { onDelete: "cascade" }),
     planId: uuid("plan_id").references(() => plans.id),
     stripeCustomerId: varchar("stripe_customer_id", { length: 100 }),
-    stripeSubscriptionId: varchar("stripe_subscription_id", { length: 100 }),
+    // stripeSubscriptionId: varchar("stripe_subscription_id", { length: 100 }),
     status: varchar("status", { length: 20 }).default("active"),
     currentPeriodEnd: timestamp("current_period_end", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),

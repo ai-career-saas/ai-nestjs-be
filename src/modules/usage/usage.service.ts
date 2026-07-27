@@ -10,7 +10,7 @@ export class UsageService {
   private currentPeriod(): string {
     const period = new Date();
     period.setDate(1);
-    return period.toISOString().split('T')[0];
+    return period.toISOString().split("T")[0];
   }
 
   async getUsageForUser(userId: string, feature: string) {
@@ -34,11 +34,14 @@ export class UsageService {
       .from(plans)
       .innerJoin(subscriptions, eq(subscriptions.planId, plans.id))
       .where(
-        and(eq(subscriptions.userId, userId), eq(subscriptions.status, 'active')),
+        and(
+          eq(subscriptions.userId, userId),
+          eq(subscriptions.status, "created"),
+        ),
       )
       .limit(1);
     const quota = (planRow?.quota as Record<string, number>) || {};
-    const limit = quota[feature] ?? 5;
+    const limit = quota[feature] || 5;
 
     return { used, limit, remaining: Math.max(0, limit - used) };
   }

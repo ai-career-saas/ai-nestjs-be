@@ -3,21 +3,21 @@ import {
   ConflictException,
   UnauthorizedException,
   Inject,
-} from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
-import { eq } from 'drizzle-orm';
-import { DRIZZLE, DrizzleDB } from '../../database.module';
-import { plans, subscriptions, users } from '../../database/schema';
-import { RegisterDto, LoginDto } from './dto/request/auth.dto'; 
-import { Response } from 'express';
+} from "@nestjs/common";
+import { JwtService } from "@nestjs/jwt";
+import * as bcrypt from "bcrypt";
+import { eq } from "drizzle-orm";
+import { DRIZZLE, DrizzleDB } from "../../database.module";
+import { plans, subscriptions, users } from "../../database/schema";
+import { RegisterDto, LoginDto } from "./dto/request/auth.dto";
+import { Response } from "express";
 
 @Injectable()
 export class AuthService {
   constructor(
     @Inject(DRIZZLE) private db: DrizzleDB,
     private jwt: JwtService,
-  ) { }
+  ) {}
 
   async register(dto: RegisterDto) {
     const email = dto.email.toLowerCase();
@@ -28,7 +28,7 @@ export class AuthService {
       .where(eq(users.email, email))
       .limit(1);
     if (existing) {
-      throw new ConflictException('Email already registered');
+      throw new ConflictException("Email already registered");
     }
 
     const passwordHash = await bcrypt.hash(dto.password, 12);
@@ -46,17 +46,20 @@ export class AuthService {
     const [freePlan] = await this.db
       .select({ id: plans.id })
       .from(plans)
-      .where(eq(plans.name, 'Free'))
+      .where(eq(plans.name, "Free"))
       .limit(1);
     if (freePlan) {
       await this.db
         .insert(subscriptions)
-        .values({ userId: user.id, planId: freePlan.id, status: 'active' })
+        .values({ userId: user.id, planId: freePlan.id, status: "active" })
         .onConflictDoNothing({ target: subscriptions.userId });
     }
 
     const tokens = this.issueTokens(user);
-    return { user: { id: user.id, email: user.email, name: user.name }, ...tokens };
+    return {
+      user: { id: user.id, email: user.email, name: user.name },
+      ...tokens,
+    };
   }
 
   async login(dto: LoginDto, res: Response) {
@@ -72,30 +75,33 @@ export class AuthService {
       .from(users)
       .where(eq(users.email, email))
       .limit(1);
-    if (!user) throw new UnauthorizedException('Invalid credentials');
+    if (!user) throw new UnauthorizedException("Invalid credentials");
 
     const valid = await bcrypt.compare(dto.password, user.passwordHash);
-    if (!valid) throw new UnauthorizedException('Invalid credentials');
+    if (!valid) throw new UnauthorizedException("Invalid credentials");
 
     const tokens = this.issueTokens(user);
 
-    res.cookie('access_token', tokens.access_token, {
+    res.cookie("access_token", tokens.access_token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
       maxAge: 15 * 60 * 1000, // 15 min
     });
 
-    res.cookie('refresh_token', tokens.refresh_token, {
+    res.cookie("refresh_token", tokens.refresh_token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
-    return { user: { id: user.id, email: user.email, name: user.name }, ...tokens };
+    return {
+      user: { id: user.id, email: user.email, name: user.name },
+      ...tokens,
+    };
   }
 
   async refresh(refreshToken: string) {
@@ -113,7 +119,7 @@ export class AuthService {
 
       return this.issueTokens(user);
     } catch {
-      throw new UnauthorizedException('Invalid refresh token');
+      throw new UnauthorizedException("Invalid refresh token");
     }
   }
 
@@ -145,11 +151,11 @@ export class AuthService {
     return {
       access_token: this.jwt.sign(payload, {
         secret: process.env.JWT_SECRET!,
-        expiresIn: '1h',
+        expiresIn: "1h",
       }),
       refresh_token: this.jwt.sign(payload, {
         secret: process.env.JWT_REFRESH_SECRET!,
-        expiresIn: '7d',
+        expiresIn: "7d",
       }),
     };
   }

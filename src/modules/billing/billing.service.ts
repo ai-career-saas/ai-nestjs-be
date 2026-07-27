@@ -64,6 +64,8 @@ export class BillingService {
     return "pending";
   }
 
+  // ------------------------------
+
   async createSubscription(userId: string, planId: string) {
     const [plan] = await this.db
       .select()
@@ -86,6 +88,7 @@ export class BillingService {
     if (!user) throw new NotFoundException("User not found");
 
     let customerId: string;
+
     const [existingSub] = await this.db
       .select({ stripeCustomerId: subscriptions.stripeCustomerId })
       .from(subscriptions)
@@ -100,6 +103,7 @@ export class BillingService {
         name: user.name,
         metadata: { userId },
       });
+
       customerId = customer.id;
     }
 
@@ -116,13 +120,17 @@ export class BillingService {
       .insert(subscriptions)
       .values({
         userId,
+        planId,
         stripeCustomerId: customerId,
         status: "pending",
       })
       .onConflictDoUpdate({
         target: subscriptions.userId,
         set: {
+          planId,
           stripeCustomerId: customerId,
+          status: "pending",
+          updatedAt: new Date(),
         },
       });
 
@@ -353,5 +361,26 @@ export class BillingService {
       createdAt: new Date(invoice.created * 1000),
       hostedInvoiceUrl: invoice.hosted_invoice_url,
     }));
+  }
+
+  async portalSubscription(userId: string) {
+    const [sub] = await this.db
+      .select({ stripeCustomerId: subscriptions.stripeCustomerId })
+      .from(subscriptions)
+      .where(eq(subscriptions.userId, userId))
+      .limit(1);
+
+    console.log(userId);
+
+    if (!sub?.stripeCustomerId) {
+      throw new BadRequestException("No billing account for this user");
+    }
+
+    const session = await this.stripe.billingPortal.sessions.create({
+      customer: sub.stripeCustomerId,
+      return_url: `${process.env.FRONTEND_URL}/settings/subscription`,
+    });
+
+    return { url: session.url };
   }
 }

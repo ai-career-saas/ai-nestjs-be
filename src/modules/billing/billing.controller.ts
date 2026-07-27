@@ -15,6 +15,7 @@ import { ApiBearerAuth, ApiBody, ApiResponse } from "@nestjs/swagger";
 import { CurrentUser } from "src/common/decorators/currentuser.decorator";
 import { CancelSubscriptionDto } from "./dto/request/CancelSubscription.dto";
 import { CancelSubscriptionResponse } from "./dto/response/CancelSubscriptionResponse.dto";
+import { UserPayload } from "src/common/interfaces/UserPayload.interface";
 
 @Controller("billing")
 export class BillingController {
@@ -70,15 +71,22 @@ export class BillingController {
   })
   @UseGuards(JwtAuthGuard)
   @Post("resume")
-  resumeSubscription(@CurrentUser() user: { id: string }) {
-    return this.billingService.resumeSubscription(user.id);
+  resumeSubscription(@CurrentUser() user: UserPayload) {
+    return this.billingService.resumeSubscription(user.userId);
   }
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Get("invoices")
-  listInvoices(@CurrentUser() user: { id: string }) {
-    return this.billingService.listInvoices(user.id);
+  listInvoices(@CurrentUser() user: UserPayload) {
+    return this.billingService.listInvoices(user.userId);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Get("portal")
+  portalSubscription(@CurrentUser() user: UserPayload) {
+    return this.billingService.portalSubscription(user.userId);
   }
 
   // Stripe calls this — no JWT guard
