@@ -11,6 +11,7 @@ export class PlansController {
   @ApiResponse({
     status: 200,
     type: GetPlansResponseDto,
+    isArray: true,
   })
   async findAll() {
     return this.plansService.findAllPlans();
