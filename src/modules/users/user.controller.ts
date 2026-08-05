@@ -7,17 +7,26 @@ import { UpdateUserDto } from "./dto/request/UpdateUser.dto";
 import { CurrentUser } from "src/common/decorators/currentuser.decorator";
 import { UserPayload } from "src/common/interfaces/UserPayload.interface";
 import { GetProfileResponseDto } from "./dto/response/GetProfileResponse.dto";
+import { GetUsageResponse } from "./dto/response/GetUsageResponse.dto";
+import { UpdateProfileResponse } from "./dto/response/UpdateProfileResponse.dto";
 
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
-@Controller('users')
+@Controller("users")
 export class UsersController {
-  constructor(private usage: UsageService, private userService: UserService) { }
+  constructor(
+    private usage: UsageService,
+    private userService: UserService,
+  ) {}
 
-  @Get('usage')
+  @Get("usage")
+  @ApiResponse({
+    status: 200,
+    type: GetUsageResponse,
+  })
   async getUsage(@Req() req: any) {
     const userId = req.user.userId;
-    const features = ['analyze', 'interview_gen', 'ats_score'];
+    const features = ["analyze", "interview_gen", "ats_score"];
     const result: Record<string, any> = {};
     for (const f of features) {
       result[f] = await this.usage.getUsageForUser(userId, f);
@@ -29,7 +38,7 @@ export class UsersController {
   @Get()
   @ApiResponse({
     status: 200,
-    description: 'Get user profile',
+    description: "Get user profile",
     type: GetProfileResponseDto,
   })
   getProfile(@CurrentUser() user: UserPayload): Promise<GetProfileResponseDto> {
@@ -37,10 +46,12 @@ export class UsersController {
   }
 
   @Patch()
-  updateProfile(
-    @CurrentUser() user: UserPayload,
-    @Body() dto: UpdateUserDto,
-  ) {
+  @ApiResponse({
+    status: 200,
+    description: "Update user profile",
+    type: UpdateProfileResponse,
+  })
+  updateProfile(@CurrentUser() user: UserPayload, @Body() dto: UpdateUserDto) {
     return this.userService.update(user.userId, dto);
   }
 }

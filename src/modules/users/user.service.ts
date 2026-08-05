@@ -1,6 +1,6 @@
 import { Injectable, Inject, NotFoundException } from "@nestjs/common";
 import { DRIZZLE, DrizzleDB } from "src/database.module";
-import { eq } from 'drizzle-orm';
+import { eq } from "drizzle-orm";
 import { users } from "src/database/schema";
 import { UpdateUserDto } from "./dto/request/UpdateUser.dto";
 
@@ -17,7 +17,7 @@ const SETTINGS_COLUMNS = {
 
 @Injectable()
 export class UserService {
-  constructor(@Inject(DRIZZLE) private db: DrizzleDB) { }
+  constructor(@Inject(DRIZZLE) private db: DrizzleDB) {}
 
   async getProfile(userId: string) {
     const [row] = await this.db
@@ -25,7 +25,7 @@ export class UserService {
       .from(users)
       .where(eq(users.id, userId));
 
-    if (!row) throw new NotFoundException('User not found');
+    if (!row) throw new NotFoundException("User not found");
     return row;
   }
 
@@ -36,7 +36,8 @@ export class UserService {
       .where(eq(users.id, userId))
       .returning(SETTINGS_COLUMNS);
 
-    if (!updated) throw new NotFoundException('User not found');
+    if (!updated) throw new NotFoundException("User not found");
+
     return updated;
   }
 }

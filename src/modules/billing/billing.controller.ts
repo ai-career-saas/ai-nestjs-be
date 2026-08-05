@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Headers,
+  HttpCode,
   Post,
   RawBodyRequest,
   Req,
@@ -16,6 +17,10 @@ import { CurrentUser } from "src/common/decorators/currentuser.decorator";
 import { CancelSubscriptionDto } from "./dto/request/CancelSubscription.dto";
 import { CancelSubscriptionResponse } from "./dto/response/CancelSubscriptionResponse.dto";
 import { UserPayload } from "src/common/interfaces/UserPayload.interface";
+import { CreateSubscriptionResponse } from "./dto/response/CreateSubscriptionResponse.dto";
+import { CreateSubscriptionRequest } from "./dto/request/CreateSubscriptionRequest.dto";
+import { GetSubscriptionResponse } from "./dto/response/GetSubscriptionResponse.dto";
+import { ResumeSubscriptionResponse } from "./dto/response/ResumeSubscriptionResponse.dto";
 
 @Controller("billing")
 export class BillingController {
@@ -23,28 +28,29 @@ export class BillingController {
 
   @ApiBearerAuth()
   @ApiBody({
-    schema: {
-      type: "object",
-      properties: {
-        planId: { type: "string" },
-      },
-    },
-    examples: {
-      planId: {
-        summary: "Subscribe to a plan",
-        value: {
-          planId: "1234567890",
-        } as any,
-      },
-    },
+    type: CreateSubscriptionRequest,
+  })
+  @ApiResponse({
+    status: 201,
+    type: CreateSubscriptionResponse,
   })
   @UseGuards(JwtAuthGuard)
   @Post("subscribe")
-  subscribe(@Body("planId") planId: string, @Req() req: any) {
-    return this.billingService.createSubscription(req.user.userId, planId);
+  @HttpCode(201)
+  subscribe(
+    @Body() createSubscriptionRequest: CreateSubscriptionRequest,
+    @Req() req: any,
+  ) {
+    return this.billingService.createSubscription(
+      req.user.userId,
+      createSubscriptionRequest.planId,
+    );
   }
 
   @ApiBearerAuth()
+  @ApiResponse({
+    type: GetSubscriptionResponse,
+  })
   @UseGuards(JwtAuthGuard)
   @Get("subscription")
   getSubscription(@Req() req: any) {
@@ -54,6 +60,10 @@ export class BillingController {
   @ApiBearerAuth()
   @ApiBody({
     type: CancelSubscriptionDto,
+  })
+  @ApiResponse({
+    status: 200,
+    type: CancelSubscriptionResponse,
   })
   @UseGuards(JwtAuthGuard)
   @Post("cancel")
@@ -67,7 +77,7 @@ export class BillingController {
   @ApiBearerAuth()
   @ApiResponse({
     status: 200,
-    type: CancelSubscriptionResponse,
+    type: ResumeSubscriptionResponse,
   })
   @UseGuards(JwtAuthGuard)
   @Post("resume")

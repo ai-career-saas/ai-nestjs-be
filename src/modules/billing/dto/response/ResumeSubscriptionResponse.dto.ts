@@ -1,3 +1,3 @@
-export class CancelSubscriptionResponse {
+export class ResumeSubscriptionResponse {
   cancelAtPeriodEnd: boolean;
 }
