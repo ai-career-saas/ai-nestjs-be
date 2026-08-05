@@ -61,7 +61,7 @@ VALUES
     '["3 Career Analyses/mo", "3 Interview Prep sessions/mo", "3 ATS Scores/mo", "Basic roadmap"]'
   ),
   (
-    'Pro',
+    'Premium',
     499,
     'For serious job seekers',
     'plan_REPLACE_WITH_STRIPE_ID',
@@ -69,7 +69,7 @@ VALUES
     '["30 Career Analyses/mo", "30 Interview Prep sessions/mo", "30 ATS Scores/mo", "Detailed roadmaps", "Market insights", "Priority support"]'
   ),
   (
-    'Premium',
+    'Pro',
     999,
     'Unlimited AI career coaching',
     'plan_REPLACE_WITH_STRIPE_ID',
