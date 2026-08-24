@@ -1,7 +1,12 @@
 import { Controller, UseGuards, Get, Req, Patch, Body } from "@nestjs/common";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { UsageService } from "../usage/usage.service";
-import { ApiBearerAuth, ApiResponse } from "@nestjs/swagger";
+import {
+  ApiBearerAuth,
+  ApiExtraModels,
+  ApiResponse,
+  getSchemaPath,
+} from "@nestjs/swagger";
 import { UserService } from "./user.service";
 import { UpdateUserDto } from "./dto/request/UpdateUser.dto";
 import { CurrentUser } from "src/common/decorators/currentuser.decorator";
@@ -20,14 +25,21 @@ export class UsersController {
   ) {}
 
   @Get("usage")
+  @ApiExtraModels(GetUsageResponse)
   @ApiResponse({
     status: 200,
-    type: GetUsageResponse,
+    schema: {
+      type: "object",
+      additionalProperties: {
+        $ref: getSchemaPath(GetUsageResponse),
+      },
+    },
   })
   async getUsage(@Req() req: any) {
     const userId = req.user.userId;
     const features = ["analyze", "interview_gen", "ats_score"];
-    const result: Record<string, any> = {};
+    const result: Record<string, GetUsageResponse> = {};
+
     for (const f of features) {
       result[f] = await this.usage.getUsageForUser(userId, f);
     }
