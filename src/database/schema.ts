@@ -10,7 +10,40 @@ import {
   unique,
   uniqueIndex,
   boolean,
+  pgEnum,
 } from "drizzle-orm/pg-core";
+
+export const agentTypeEnum = pgEnum("agent_type", [
+  "resume_analysis",
+  "resume_builder",
+  "job_matcher",
+  "interview_questions",
+  "ats_scorer",
+]);
+
+export const agentResults = pgTable(
+  "agent_results",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    agentType: agentTypeEnum("agent_type").notNull(),
+
+    result: jsonb("result").notNull(), // ผลลัพธ์จริงที่ user เลือกเก็บ
+    metadata: jsonb("metadata"), // { model, provider, tokensUsed } เก็บไว้ debug/reference
+
+    savedAt: timestamp("saved_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (table) => ({
+    // 1 user เก็บได้อันเดียวต่อ agent type — save ซ้ำ = ทับของเดิม
+    userAgentUnique: uniqueIndex("agent_results_user_agent_unique").on(
+      table.userId,
+      table.agentType,
+    ),
+  }),
+);
 
 export const users = pgTable(
   "users",
