@@ -33,12 +33,7 @@ export class UsageService {
       .select({ quota: plans.quota })
       .from(plans)
       .innerJoin(subscriptions, eq(subscriptions.planId, plans.id))
-      .where(
-        and(
-          eq(subscriptions.userId, userId),
-          eq(subscriptions.status, "created"),
-        ),
-      )
+      .where(and(eq(subscriptions.userId, userId)))
       .limit(1);
     const quota = (planRow?.quota as Record<string, number>) || {};
     const limit = quota[feature] || 5;
