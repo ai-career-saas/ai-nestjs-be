@@ -129,8 +129,8 @@ export class ProxyController {
   }
 
   // ── ATS Resume Scoring ───────────────────────────────────────────
-  @UseGuards(JwtAuthGuard, QuotaGuard)
-  @Feature("ats_score")
+  // ATS scoring is free and unlimited; authentication still protects the endpoint.
+  @UseGuards(JwtAuthGuard)
   @Post("ats/score")
   @UseInterceptors(FileInterceptor("resume_file"))
   @ApiConsumes("multipart/form-data")

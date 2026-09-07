@@ -72,9 +72,7 @@ export const plans = pgTable("plans", {
   priceThb: integer("price_thb").notNull().default(0),
   description: text("description"),
   stripePriceId: varchar("stripe_price_id", { length: 100 }),
-  quota: jsonb("quota")
-    .notNull()
-    .default({ analyze: 5, interview_gen: 5, ats_score: 5 }),
+  quota: jsonb("quota").notNull().default({ analyze: 5, interview_gen: 5 }),
   features: jsonb("features").notNull().default([]),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });

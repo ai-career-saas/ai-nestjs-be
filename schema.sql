@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS plans (
   price_inr INT NOT NULL DEFAULT 0,
   description TEXT,
   stripe_price_id VARCHAR(100),
-  quota JSONB NOT NULL DEFAULT '{"analyze": 5, "interview_gen": 5, "ats_score": 5}',
+  quota JSONB NOT NULL DEFAULT '{"analyze": 5, "interview_gen": 5}',
   features JSONB NOT NULL DEFAULT '[]',
   created_at TIMESTAMPTZ DEFAULT now()
 );
@@ -31,7 +31,6 @@ CREATE TABLE IF NOT EXISTS subscriptions (
   user_id UUID UNIQUE REFERENCES users(id) ON DELETE CASCADE,
   plan_id UUID REFERENCES plans(id),
   stripe_subscription_id VARCHAR(100),
-  stripe_customer_id VARCHAR(100),
   status VARCHAR(20) DEFAULT 'active',
   current_period_end TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT now(),
@@ -57,26 +56,35 @@ VALUES
     0,
     'Get started with AI career tools',
     NULL,
-    '{"analyze": 3, "interview_gen": 3, "ats_score": 3}',
-    '["3 Career Analyses/mo", "3 Interview Prep sessions/mo", "3 ATS Scores/mo", "Basic roadmap"]'
-  ),
-  (
-    'Premium',
-    499,
-    'For serious job seekers',
-    'plan_REPLACE_WITH_STRIPE_ID',
-    '{"analyze": 30, "interview_gen": 30, "ats_score": 30}',
-    '["30 Career Analyses/mo", "30 Interview Prep sessions/mo", "30 ATS Scores/mo", "Detailed roadmaps", "Market insights", "Priority support"]'
+    '{"analyze": 3, "interview_gen": 3}',
+    '["3 Career Analyses/mo", "3 Interview Prep sessions/mo", "Unlimited ATS Resume Scores", "Basic roadmap"]'
   ),
   (
     'Pro',
+    499,
+    'For serious job seekers',
+    'plan_REPLACE_WITH_STRIPE_ID',
+    '{"analyze": 30, "interview_gen": 30}',
+    '["30 Career Analyses/mo", "30 Interview Prep sessions/mo", "Unlimited ATS Resume Scores", "Detailed roadmaps", "Market insights", "Priority support"]'
+  ),
+  (
+    'Premium',
     999,
     'Unlimited AI career coaching',
     'plan_REPLACE_WITH_STRIPE_ID',
-    '{"analyze": 999, "interview_gen": 999, "ats_score": 999}',
-    '["Unlimited analyses", "Unlimited Interview Prep", "Unlimited ATS Scores", "Advanced roadmaps", "Salary insights", "1-on-1 AI coaching", "Priority support"]'
+    '{"analyze": 999, "interview_gen": 999}',
+    '["Unlimited analyses", "Unlimited Interview Prep", "Unlimited ATS Resume Scores", "Advanced roadmaps", "Salary insights", "1-on-1 AI coaching", "Priority support"]'
   )
 ON CONFLICT (name) DO NOTHING;
+
+-- Make the change effective for databases that already have seeded plans.
+UPDATE plans
+SET quota = quota - 'ats_score',
+    features = (
+      SELECT COALESCE(jsonb_agg(feature), '[]'::jsonb)
+      FROM jsonb_array_elements_text(features) AS feature
+      WHERE feature NOT ILIKE '%ATS%Score%'
+    ) || '["Unlimited ATS Resume Scores"]'::jsonb;
 
 -- Indexes
 CREATE INDEX IF NOT EXISTS idx_subscriptions_user ON subscriptions(user_id);
