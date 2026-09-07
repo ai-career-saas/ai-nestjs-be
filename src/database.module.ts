@@ -1,9 +1,9 @@
-import { Global, Module } from '@nestjs/common';
-import { drizzle, NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { Pool } from 'pg';
-import * as schema from './database/schema';
+import { Global, Module } from "@nestjs/common";
+import { drizzle, NodePgDatabase } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
+import * as schema from "./database/schema";
 
-export const DRIZZLE = 'DRIZZLE';
+export const DRIZZLE = "DRIZZLE";
 export type DrizzleDB = NodePgDatabase<typeof schema>;
 
 const dbProvider = {
@@ -11,10 +11,12 @@ const dbProvider = {
   useFactory: (): DrizzleDB => {
     const pool = new Pool({
       connectionString: process.env.DATABASE_URL,
-      ssl:
-        process.env.NODE_ENV === 'production'
-          ? { rejectUnauthorized: false }
-          : false,
+      ssl: {
+        rejectUnauthorized: false,
+      },
+      // process.env.NODE_ENV === 'production'
+      //   ? { rejectUnauthorized: false }
+      //   : false,
     });
     return drizzle(pool, { schema });
   },
