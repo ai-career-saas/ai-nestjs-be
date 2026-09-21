@@ -9,8 +9,8 @@ import {
 } from "@nestjs/swagger";
 import { UserService } from "./user.service";
 import { UpdateUserDto } from "./dto/request/UpdateUser.dto";
-import { CurrentUser } from "src/common/decorators/currentuser.decorator";
-import { UserPayload } from "src/common/interfaces/UserPayload.interface";
+import { CurrentUser } from "../../common/decorators/currentuser.decorator";
+import { UserPayload } from "../../common/interfaces/UserPayload.interface";
 import { GetProfileResponseDto } from "./dto/response/GetProfileResponse.dto";
 import { GetUsageResponse } from "./dto/response/GetUsageResponse.dto";
 import { UpdateProfileResponse } from "./dto/response/UpdateProfileResponse.dto";

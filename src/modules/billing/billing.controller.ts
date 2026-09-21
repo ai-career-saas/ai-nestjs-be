@@ -13,10 +13,10 @@ import {
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { BillingService } from "./billing.service";
 import { ApiBearerAuth, ApiBody, ApiResponse } from "@nestjs/swagger";
-import { CurrentUser } from "src/common/decorators/currentuser.decorator";
+import { CurrentUser } from "../../common/decorators/currentuser.decorator";
 import { CancelSubscriptionDto } from "./dto/request/CancelSubscription.dto";
 import { CancelSubscriptionResponse } from "./dto/response/CancelSubscriptionResponse.dto";
-import { UserPayload } from "src/common/interfaces/UserPayload.interface";
+import { UserPayload } from "../../common/interfaces/UserPayload.interface";
 import { CreateSubscriptionResponse } from "./dto/response/CreateSubscriptionResponse.dto";
 import { CreateSubscriptionRequest } from "./dto/request/CreateSubscriptionRequest.dto";
 import { GetSubscriptionResponse } from "./dto/response/GetSubscriptionResponse.dto";
