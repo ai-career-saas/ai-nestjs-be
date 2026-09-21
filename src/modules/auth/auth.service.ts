@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  ConflictException,
-  UnauthorizedException,
-  Inject,
-} from "@nestjs/common";
+import { Injectable, ConflictException, UnauthorizedException, Inject } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcrypt";
 import { eq } from "drizzle-orm";

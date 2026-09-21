@@ -1,12 +1,7 @@
 import { Controller, UseGuards, Get, Req, Patch, Body } from "@nestjs/common";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { UsageService } from "../usage/usage.service";
-import {
-  ApiBearerAuth,
-  ApiExtraModels,
-  ApiResponse,
-  getSchemaPath,
-} from "@nestjs/swagger";
+import { ApiBearerAuth, ApiExtraModels, ApiResponse, getSchemaPath } from "@nestjs/swagger";
 import { UserService } from "./user.service";
 import { UpdateUserDto } from "./dto/request/UpdateUser.dto";
 import { CurrentUser } from "../../common/decorators/currentuser.decorator";

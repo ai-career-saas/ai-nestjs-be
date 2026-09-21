@@ -59,8 +59,6 @@ export class UsageService {
     return this.db
       .select({ feature: usageLogs.feature, count: usageLogs.count })
       .from(usageLogs)
-      .where(
-        and(eq(usageLogs.userId, userId), eq(usageLogs.period, periodStr)),
-      );
+      .where(and(eq(usageLogs.userId, userId), eq(usageLogs.period, periodStr)));
   }
 }

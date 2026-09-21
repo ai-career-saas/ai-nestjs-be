@@ -1,11 +1,4 @@
-import {
-  Controller,
-  UseGuards,
-  Post,
-  UseInterceptors,
-  Body,
-  UploadedFile,
-} from "@nestjs/common";
+import { Controller, UseGuards, Post, UseInterceptors, Body, UploadedFile } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import axios from "axios";
 import { Feature } from "../../common/decorators/feature.decorator";
@@ -16,12 +9,7 @@ import { AnalyzeRequestDto } from "./dto/request/AnalyzeRequest.dto";
 import { AtsScoreRequestDto } from "./dto/request/AtsScoreRequest.dto";
 import { GenerateInterviewRequestDto } from "./dto/request/GenerateInterviewRequest.dto";
 import { SkillUpgradeRequestDto } from "./dto/request/SkillUpgradeRequest.dto";
-import {
-  ApiBearerAuth,
-  ApiBody,
-  ApiConsumes,
-  ApiResponse,
-} from "@nestjs/swagger";
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiResponse } from "@nestjs/swagger";
 import { SkillUpgradeResponseDto } from "./dto/response/SkillUpgradeResponse.dto";
 import { AnalysisResponseDto } from "./dto/response/AnalyzeResponse.dto";
 import { InterviewQuestionResponse } from "./dto/response/InterviewQuestPrepResponse.dto";
@@ -39,10 +27,7 @@ async function forwardToFastAPI(
 
   for (const [key, value] of Object.entries(body)) {
     if (value !== undefined && value !== null) {
-      form.append(
-        key,
-        typeof value === "object" ? JSON.stringify(value) : String(value),
-      );
+      form.append(key, typeof value === "object" ? JSON.stringify(value) : String(value));
     }
   }
 
@@ -113,10 +98,7 @@ export class ProxyController {
   @ApiBody({
     type: GenerateInterviewRequestDto,
   })
-  async generateInterview(
-    @Body() body: any,
-    @UploadedFile() file?: Express.Multer.File,
-  ) {
+  async generateInterview(@Body() body: any, @UploadedFile() file?: Express.Multer.File) {
     return forwardToFastAPI(
       "/interview/generate",
       {
@@ -141,10 +123,7 @@ export class ProxyController {
   @ApiBody({
     type: AtsScoreRequestDto,
   })
-  async atsScore(
-    @Body() body: any,
-    @UploadedFile() file?: Express.Multer.File,
-  ) {
+  async atsScore(@Body() body: any, @UploadedFile() file?: Express.Multer.File) {
     return forwardToFastAPI(
       "/ats/score",
       {

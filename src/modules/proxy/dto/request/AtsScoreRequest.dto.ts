@@ -15,4 +15,3 @@ export class AtsScoreRequestDto {
   })
   job_description: string;
 }
-

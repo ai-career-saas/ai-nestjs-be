@@ -29,4 +29,3 @@ export class AnalyzeRequestDto {
   })
   preferences?: string;
 }
-
