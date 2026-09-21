@@ -10,11 +10,7 @@ import {
   ValidateNested,
 } from "class-validator";
 
-export const ATS_IMPORTANCE_LEVELS = [
-  "critical",
-  "important",
-  "nice-to-have",
-] as const;
+export const ATS_IMPORTANCE_LEVELS = ["critical", "important", "nice-to-have"] as const;
 export type ATSImportanceLevel = (typeof ATS_IMPORTANCE_LEVELS)[number];
 
 export class ATSKeywordMatchDto {

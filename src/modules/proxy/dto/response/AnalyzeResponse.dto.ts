@@ -1,9 +1,4 @@
-import {
-  ApiExtraModels,
-  ApiProperty,
-  ApiPropertyOptional,
-  getSchemaPath,
-} from "@nestjs/swagger";
+import { ApiExtraModels, ApiProperty, ApiPropertyOptional, getSchemaPath } from "@nestjs/swagger";
 import { Type } from "class-transformer";
 import {
   IsArray,
@@ -30,11 +25,7 @@ export type SkillLevel = (typeof SKILL_LEVELS)[number];
 export const SKILL_CATEGORIES = ["technical", "soft", "domain"] as const;
 export type SkillCategory = (typeof SKILL_CATEGORIES)[number];
 
-export const IMPORTANCE_LEVELS = [
-  "critical",
-  "important",
-  "nice-to-have",
-] as const;
+export const IMPORTANCE_LEVELS = ["critical", "important", "nice-to-have"] as const;
 export type ImportanceLevel = (typeof IMPORTANCE_LEVELS)[number];
 
 export const RESOURCE_COSTS = ["free", "paid"] as const;
@@ -595,15 +586,9 @@ export class ValidationInfoDto {
 // ─────────────────────────────────────────────────────────────
 
 export type AnalysisResultDto =
-  | HasGoalAnalysisDto
-  | NoGoalSufficientAnalysisDto
-  | NoGoalInsufficientAnalysisDto;
+  HasGoalAnalysisDto | NoGoalSufficientAnalysisDto | NoGoalInsufficientAnalysisDto;
 
-@ApiExtraModels(
-  HasGoalAnalysisDto,
-  NoGoalSufficientAnalysisDto,
-  NoGoalInsufficientAnalysisDto,
-)
+@ApiExtraModels(HasGoalAnalysisDto, NoGoalSufficientAnalysisDto, NoGoalInsufficientAnalysisDto)
 export class AnalysisResponseDto {
   @ApiProperty()
   @IsString()

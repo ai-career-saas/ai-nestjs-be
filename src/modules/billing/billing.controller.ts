@@ -37,10 +37,7 @@ export class BillingController {
   @UseGuards(JwtAuthGuard)
   @Post("subscribe")
   @HttpCode(201)
-  subscribe(
-    @Body() createSubscriptionRequest: CreateSubscriptionRequest,
-    @Req() req: any,
-  ) {
+  subscribe(@Body() createSubscriptionRequest: CreateSubscriptionRequest, @Req() req: any) {
     return this.billingService.createSubscription(
       req.user.userId,
       createSubscriptionRequest.planId,
@@ -67,10 +64,7 @@ export class BillingController {
   })
   @UseGuards(JwtAuthGuard)
   @Post("cancel")
-  cancelSubscription(
-    @CurrentUser() user: { id: string },
-    @Body() dto: CancelSubscriptionDto,
-  ) {
+  cancelSubscription(@CurrentUser() user: { id: string }, @Body() dto: CancelSubscriptionDto) {
     return this.billingService.cancelSubscription(user.id, dto.immediately);
   }
 
@@ -105,8 +99,7 @@ export class BillingController {
     @Headers("stripe-signature") signature: string,
     @Req() req: RawBodyRequest<Request>,
   ) {
-    const rawBody =
-      (req as any).rawBody?.toString() || JSON.stringify((req as any).body);
+    const rawBody = (req as any).rawBody?.toString() || JSON.stringify((req as any).body);
     return this.billingService.handleWebhook(rawBody, signature);
   }
 }
