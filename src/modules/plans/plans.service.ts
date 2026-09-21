@@ -1,7 +1,7 @@
 import { Injectable, Inject } from "@nestjs/common";
 import { asc } from "drizzle-orm";
-import { DRIZZLE, DrizzleDB } from "src/database.module";
-import { plans } from "src/database/schema";
+import { DRIZZLE, DrizzleDB } from "../../database.module";
+import { plans } from "../../database/schema";
 
 @Injectable()
 export class PlansService {

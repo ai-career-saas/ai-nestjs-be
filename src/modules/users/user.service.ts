@@ -1,7 +1,7 @@
 import { Injectable, Inject, NotFoundException } from "@nestjs/common";
-import { DRIZZLE, DrizzleDB } from "src/database.module";
+import { DRIZZLE, DrizzleDB } from "../../database.module";
 import { eq } from "drizzle-orm";
-import { users } from "src/database/schema";
+import { users } from "../../database/schema";
 import { UpdateUserDto } from "./dto/request/UpdateUser.dto";
 
 // Only the settings-relevant columns — never select passwordHash here.

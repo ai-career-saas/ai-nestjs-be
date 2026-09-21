@@ -8,8 +8,8 @@ import {
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import axios from "axios";
-import { Feature } from "src/common/decorators/feature.decorator";
-import { QuotaGuard } from "src/common/guards/quota.guard";
+import { Feature } from "../../common/decorators/feature.decorator";
+import { QuotaGuard } from "../../common/guards/quota.guard";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import FormData from "form-data";
 import { AnalyzeRequestDto } from "./dto/request/AnalyzeRequest.dto";

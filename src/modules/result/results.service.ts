@@ -1,6 +1,6 @@
 import { Injectable, Inject, NotFoundException } from "@nestjs/common";
-import { DRIZZLE, DrizzleDB } from "src/database.module";
-import { agentResults, agentTypeEnum } from "src/database/schema";
+import { DRIZZLE, DrizzleDB } from "../../database.module";
+import { agentResults, agentTypeEnum } from "../../database/schema";
 import { eq, and } from "drizzle-orm";
 
 export type AgentType = (typeof agentTypeEnum.enumValues)[number];

@@ -3,12 +3,11 @@ import {
   ExecutionContext,
   ForbiddenException,
   Injectable,
-} from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import { UsageService } from 'src/modules/usage/usage.service';
+} from "@nestjs/common";
+import { Reflector } from "@nestjs/core";
+import { UsageService } from "../../modules/usage/usage.service";
 
-
-export const FEATURE_KEY = 'feature';
+export const FEATURE_KEY = "feature";
 
 @Injectable()
 export class QuotaGuard implements CanActivate {
