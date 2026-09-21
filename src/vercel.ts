@@ -8,26 +8,12 @@ import { AppModule } from "./app.module";
 
 const server = express();
 
-let initialized = false;
+let bootstrapPromise: Promise<void> | null = null;
 
-async function bootstrap() {
-  if (initialized) return;
-
+async function createApp() {
   const app = await NestFactory.create(AppModule, new ExpressAdapter(server), {
     rawBody: true,
   });
-
-  const config = new DocumentBuilder()
-    .setTitle("AI Career SaaS API")
-    .setDescription("The AI Career SaaS API description")
-    .setVersion("1.0")
-    .addTag("AI Career SaaS")
-    .addBearerAuth()
-    .build();
-
-  const document = SwaggerModule.createDocument(app, config);
-
-  SwaggerModule.setup("api/docs", app, document);
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -42,9 +28,37 @@ async function bootstrap() {
     credentials: true,
   });
 
-  await app.init();
+  const config = new DocumentBuilder()
+    .setTitle("AI Career SaaS API")
+    .setDescription("The AI Career SaaS API description")
+    .setVersion("1.0")
+    .addTag("AI Career SaaS")
+    .addBearerAuth()
+    .build();
 
-  initialized = true;
+  const document = SwaggerModule.createDocument(app, config);
+
+  SwaggerModule.setup("api/docs", app, document, {
+    customCssUrl:
+      "https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css",
+    customJs: [
+      "https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js",
+      "https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-standalone-preset.js",
+    ],
+  });
+
+  await app.init();
+}
+
+function bootstrap() {
+  if (!bootstrapPromise) {
+    bootstrapPromise = createApp().catch((err) => {
+      // Reset so the next request can retry after a failed cold start
+      bootstrapPromise = null;
+      throw err;
+    });
+  }
+  return bootstrapPromise;
 }
 
 export default async function handler(
