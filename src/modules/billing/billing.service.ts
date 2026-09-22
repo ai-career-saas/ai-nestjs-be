@@ -1,7 +1,8 @@
 import { Injectable, Inject, NotFoundException, BadRequestException } from "@nestjs/common";
 import { and, eq } from "drizzle-orm";
 import Stripe = require("stripe");
-import { DRIZZLE, DrizzleDB } from "../../database.module";
+import { DRIZZLE } from "../../database.module";
+import type { DrizzleDB } from "../../database.module";
 import { plans, subscriptions, users } from "../../database/schema";
 
 @Injectable()

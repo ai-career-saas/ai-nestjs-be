@@ -1,5 +1,6 @@
 import { Injectable, Inject, NotFoundException } from "@nestjs/common";
-import { DRIZZLE, DrizzleDB } from "../../database.module";
+import { DRIZZLE } from "../../database.module";
+import type { DrizzleDB } from "../../database.module";
 import { agentResults, agentTypeEnum } from "../../database/schema";
 import { eq, and } from "drizzle-orm";
 
