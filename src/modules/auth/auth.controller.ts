@@ -42,6 +42,20 @@ export class AuthController {
     return this.auth.refresh(dto.refresh_token);
   }
 
+  @Post("logout")
+  @ApiResponse({
+    status: 200,
+    description: "Logout successful",
+  })
+  logout(@Res({ passthrough: true }) res: Response) {
+    res.clearCookie("access_token");
+    res.clearCookie("refresh_token");
+
+    return {
+      message: "Logout successful",
+    };
+  }
+
   @ApiBearerAuth()
   @ApiResponse({
     status: 200,
