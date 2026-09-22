@@ -10,6 +10,7 @@ async function bootstrap() {
 
   app.use(helmet());
   app.useGlobalFilters(new AllExceptionsFilter());
+  app.enableShutdownHooks();
 
   const config = new DocumentBuilder()
     .setTitle("AI Career SaaS API")
