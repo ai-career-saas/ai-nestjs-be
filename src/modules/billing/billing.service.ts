@@ -1,12 +1,8 @@
-import {
-  Injectable,
-  Inject,
-  NotFoundException,
-  BadRequestException,
-} from "@nestjs/common";
+import { Injectable, Inject, NotFoundException, BadRequestException } from "@nestjs/common";
 import { and, eq } from "drizzle-orm";
 import Stripe = require("stripe");
-import { DRIZZLE, DrizzleDB } from "../../database.module";
+import { DRIZZLE } from "../../database.module";
+import type { DrizzleDB } from "../../database.module";
 import { plans, subscriptions, users } from "../../database/schema";
 
 @Injectable()
@@ -24,9 +20,7 @@ export class BillingService {
     return new Date(periodEnd * 1000);
   }
 
-  private getInvoiceSubscriptionId(
-    invoice: Stripe.Invoice,
-  ): string | undefined {
+  private getInvoiceSubscriptionId(invoice: Stripe.Invoice): string | undefined {
     const subscription = invoice.parent?.subscription_details?.subscription;
     if (!subscription) return undefined;
     return typeof subscription === "string" ? subscription : subscription.id;
@@ -36,17 +30,13 @@ export class BillingService {
     return sub.items?.data?.[0]?.price?.id;
   }
 
-  private getCheckoutSessionSubscriptionId(
-    session: Stripe.Checkout.Session,
-  ): string | undefined {
+  private getCheckoutSessionSubscriptionId(session: Stripe.Checkout.Session): string | undefined {
     const subscription = session.subscription;
     if (!subscription) return undefined;
     return typeof subscription === "string" ? subscription : subscription.id;
   }
 
-  private async getPlanIdByStripePriceId(
-    stripePriceId: string,
-  ): Promise<string | undefined> {
+  private async getPlanIdByStripePriceId(stripePriceId: string): Promise<string | undefined> {
     const [plan] = await this.db
       .select({ id: plans.id })
       .from(plans)
@@ -55,9 +45,7 @@ export class BillingService {
     return plan?.id;
   }
 
-  private mapStripeSubscriptionStatus(
-    status: Stripe.Subscription.Status,
-  ): string {
+  private mapStripeSubscriptionStatus(status: Stripe.Subscription.Status): string {
     if (status === "active" || status === "trialing") return "active";
     if (status === "past_due" || status === "unpaid") return "halted";
     if (status === "canceled") return "cancelled";
@@ -67,17 +55,11 @@ export class BillingService {
   // ------------------------------
 
   async createSubscription(userId: string, planId: string) {
-    const [plan] = await this.db
-      .select()
-      .from(plans)
-      .where(eq(plans.id, planId))
-      .limit(1);
+    const [plan] = await this.db.select().from(plans).where(eq(plans.id, planId)).limit(1);
     if (!plan) throw new NotFoundException("Plan not found");
 
     if (!plan.stripePriceId) {
-      throw new BadRequestException(
-        "This plan does not support Stripe billing",
-      );
+      throw new BadRequestException("This plan does not support Stripe billing");
     }
 
     const [user] = await this.db
@@ -161,8 +143,7 @@ export class BillingService {
         const planId = session.metadata?.planId;
         if (!userId || !planId || session.payment_status !== "paid") break;
 
-        const stripeSubscriptionId =
-          this.getCheckoutSessionSubscriptionId(session);
+        const stripeSubscriptionId = this.getCheckoutSessionSubscriptionId(session);
         const [plan] = await this.db
           .select({ id: plans.id })
           .from(plans)
@@ -257,15 +238,9 @@ export class BillingService {
     const [sub] = await this.db
       .select({ stripeSubscriptionId: subscriptions.stripeSubscriptionId })
       .from(subscriptions)
-      .where(
-        and(
-          eq(subscriptions.userId, userId),
-          eq(subscriptions.status, "active"),
-        ),
-      )
+      .where(and(eq(subscriptions.userId, userId), eq(subscriptions.status, "active")))
       .limit(1);
-    if (!sub.stripeSubscriptionId)
-      throw new NotFoundException("No active subscription");
+    if (!sub.stripeSubscriptionId) throw new NotFoundException("No active subscription");
 
     if (immediately) {
       await this.stripe.subscriptions.cancel(sub.stripeSubscriptionId);

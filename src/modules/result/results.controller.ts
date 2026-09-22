@@ -1,13 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Delete,
-  Body,
-  Param,
-  UseGuards,
-  Req,
-} from "@nestjs/common";
+import { Controller, Get, Post, Delete, Body, Param, UseGuards, Req } from "@nestjs/common";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { SaveResultDto } from "./dto/response/SaveResultResponse.dto";
 import { AgentType, ResultsService } from "./results.service";
@@ -19,12 +10,7 @@ export class ResultsController {
 
   @Post()
   save(@Req() req, @Body() dto: SaveResultDto) {
-    return this.resultsService.saveResult(
-      req.user.id,
-      dto.agentType,
-      dto.result,
-      dto.metadata,
-    );
+    return this.resultsService.saveResult(req.user.id, dto.agentType, dto.result, dto.metadata);
   }
 
   @Get()

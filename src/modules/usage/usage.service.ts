@@ -1,6 +1,7 @@
 import { Injectable, Inject } from "@nestjs/common";
 import { and, eq, sql } from "drizzle-orm";
-import { DRIZZLE, DrizzleDB } from "../../database.module";
+import { DRIZZLE } from "../../database.module";
+import type { DrizzleDB } from "../../database.module";
 import { usageLogs, plans, subscriptions } from "../../database/schema";
 
 @Injectable()
@@ -59,8 +60,6 @@ export class UsageService {
     return this.db
       .select({ feature: usageLogs.feature, count: usageLogs.count })
       .from(usageLogs)
-      .where(
-        and(eq(usageLogs.userId, userId), eq(usageLogs.period, periodStr)),
-      );
+      .where(and(eq(usageLogs.userId, userId), eq(usageLogs.period, periodStr)));
   }
 }

@@ -1,5 +1,6 @@
 import { Injectable, Inject, NotFoundException } from "@nestjs/common";
-import { DRIZZLE, DrizzleDB } from "../../database.module";
+import { DRIZZLE } from "../../database.module";
+import type { DrizzleDB } from "../../database.module";
 import { agentResults, agentTypeEnum } from "../../database/schema";
 import { eq, and } from "drizzle-orm";
 
@@ -9,12 +10,7 @@ export type AgentType = (typeof agentTypeEnum.enumValues)[number];
 export class ResultsService {
   constructor(@Inject(DRIZZLE) private db: DrizzleDB) {}
 
-  async saveResult(
-    userId: string,
-    agentType: AgentType,
-    result: unknown,
-    metadata?: unknown,
-  ) {
+  async saveResult(userId: string, agentType: AgentType, result: unknown, metadata?: unknown) {
     return this.db
       .insert(agentResults)
       .values({ userId, agentType, result, metadata, updatedAt: new Date() })
@@ -36,12 +32,7 @@ export class ResultsService {
     const [row] = await this.db
       .select()
       .from(agentResults)
-      .where(
-        and(
-          eq(agentResults.userId, userId),
-          eq(agentResults.agentType, agentType),
-        ),
-      )
+      .where(and(eq(agentResults.userId, userId), eq(agentResults.agentType, agentType)))
       .limit(1);
 
     if (!row) throw new NotFoundException(`No saved result for ${agentType}`);
@@ -51,11 +42,6 @@ export class ResultsService {
   async deleteResult(userId: string, agentType: AgentType) {
     await this.db
       .delete(agentResults)
-      .where(
-        and(
-          eq(agentResults.userId, userId),
-          eq(agentResults.agentType, agentType),
-        ),
-      );
+      .where(and(eq(agentResults.userId, userId), eq(agentResults.agentType, agentType)));
   }
 }

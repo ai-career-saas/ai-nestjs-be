@@ -4,11 +4,11 @@ API gateway for the **AI Career Advisor** platform — handles authentication, b
 
 Part of a three-tier architecture:
 
-| Service | Stack | Role |
-| --- | --- | --- |
-| [`ai-career-fe`](https://github.com/ai-career-saas/ai-career-fe) | Next.js 15 | Frontend |
-| **`ai-nestjs-be`** (this repo) | NestJS 11 | API gateway, auth, billing, quota |
-| [`ai-fastapi-be`](https://github.com/ai-career-saas/ai-fastapi-be) | FastAPI + LangGraph | AI agent layer |
+| Service                                                            | Stack               | Role                              |
+| ------------------------------------------------------------------ | ------------------- | --------------------------------- |
+| [`ai-career-fe`](https://github.com/ai-career-saas/ai-career-fe)   | Next.js 15          | Frontend                          |
+| **`ai-nestjs-be`** (this repo)                                     | NestJS 11           | API gateway, auth, billing, quota |
+| [`ai-fastapi-be`](https://github.com/ai-career-saas/ai-fastapi-be) | FastAPI + LangGraph | AI agent layer                    |
 
 ## Tech Stack
 
@@ -41,30 +41,30 @@ Server runs at `http://localhost:4000`. Swagger docs at `http://localhost:4000/a
 
 ### Environment Variables
 
-| Variable | Description |
-| --- | --- |
-| `DATABASE_URL` | PostgreSQL connection string |
-| `JWT_SECRET` | Access token signing secret |
-| `JWT_REFRESH_SECRET` | Refresh token signing secret |
-| `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET` / `RAZORPAY_WEBHOOK_SECRET` | Razorpay billing integration |
-| `FASTAPI_URL` | Internal URL of the FastAPI AI service (`http://localhost:8000` locally) |
-| `PORT` | Server port (default `4000`) |
-| `NODE_ENV` | `development` / `production` |
-| `FRONTEND_URL` | Used for CORS origin |
+| Variable                                                              | Description                                                              |
+| --------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `DATABASE_URL`                                                        | PostgreSQL connection string                                             |
+| `JWT_SECRET`                                                          | Access token signing secret                                              |
+| `JWT_REFRESH_SECRET`                                                  | Refresh token signing secret                                             |
+| `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET` / `RAZORPAY_WEBHOOK_SECRET` | Razorpay billing integration                                             |
+| `FASTAPI_URL`                                                         | Internal URL of the FastAPI AI service (`http://localhost:8000` locally) |
+| `PORT`                                                                | Server port (default `4000`)                                             |
+| `NODE_ENV`                                                            | `development` / `production`                                             |
+| `FRONTEND_URL`                                                        | Used for CORS origin                                                     |
 
 > Stripe keys are read via `ConfigModule` but not listed in `.env.example` yet — add `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` if working on the billing module locally.
 
 ## Scripts
 
-| Command | Description |
-| --- | --- |
-| `npm run start:dev` | Start with watch mode |
-| `npm run build` | Compile to `dist/` |
-| `npm run start:prod` | Run compiled build (`node dist/main`) |
-| `npm run db:generate` | Generate a Drizzle migration from schema changes |
-| `npm run db:migrate` | Apply pending migrations |
-| `npm run db:push` | Push schema directly (dev convenience, skips migration files) |
-| `npm run db:studio` | Open Drizzle Studio |
+| Command               | Description                                                   |
+| --------------------- | ------------------------------------------------------------- |
+| `npm run start:dev`   | Start with watch mode                                         |
+| `npm run build`       | Compile to `dist/`                                            |
+| `npm run start:prod`  | Run compiled build (`node dist/main`)                         |
+| `npm run db:generate` | Generate a Drizzle migration from schema changes              |
+| `npm run db:migrate`  | Apply pending migrations                                      |
+| `npm run db:push`     | Push schema directly (dev convenience, skips migration files) |
+| `npm run db:studio`   | Open Drizzle Studio                                           |
 
 ## Project Structure
 
@@ -93,13 +93,13 @@ src/
 
 Full interactive reference at `/api/docs` (Swagger). Route prefix is currently **not** set (`app.setGlobalPrefix('api')` is commented out in `main.ts`), so routes are mounted at their controller path directly, e.g. `POST /auth/login` rather than `POST /api/auth/login` — worth confirming before wiring the frontend or infra health checks.
 
-| Module | Routes |
-| --- | --- |
-| Auth | `POST /auth/register`, `POST /auth/login`, `POST /auth/refresh`, `GET /auth/me` |
-| Users | `GET /users`, `PATCH /users`, `GET /users/usage` |
-| Plans | `GET /plans` |
-| Billing | `POST /billing/subscribe`, `GET /billing/subscription`, `POST /billing/cancel`, `POST /billing/resume`, `GET /billing/invoices`, `GET /billing/portal`, `POST /billing/webhook` |
-| Proxy (→ FastAPI) | `POST /proxy/analyze`, `POST /proxy/interview/generate`, `POST /proxy/ats/score`, `POST /proxy/skill-upgrade` |
+| Module            | Routes                                                                                                                                                                          |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Auth              | `POST /auth/register`, `POST /auth/login`, `POST /auth/refresh`, `GET /auth/me`                                                                                                 |
+| Users             | `GET /users`, `PATCH /users`, `GET /users/usage`                                                                                                                                |
+| Plans             | `GET /plans`                                                                                                                                                                    |
+| Billing           | `POST /billing/subscribe`, `GET /billing/subscription`, `POST /billing/cancel`, `POST /billing/resume`, `GET /billing/invoices`, `GET /billing/portal`, `POST /billing/webhook` |
+| Proxy (→ FastAPI) | `POST /proxy/analyze`, `POST /proxy/interview/generate`, `POST /proxy/ats/score`, `POST /proxy/skill-upgrade`                                                                   |
 
 Note: the ATS scoring endpoint is intentionally public/unlimited on this route's frontend counterpart — confirm `QuotaGuard`/`JwtAuthGuard` usage per-route in `proxy.controller.ts` before assuming all proxy routes require auth.
 

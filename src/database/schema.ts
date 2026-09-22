@@ -56,9 +56,7 @@ export const users = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 
     locale: varchar("locale", { length: 5 }).notNull().default("en"), // 'en' | 'th'
-    timezone: varchar("timezone", { length: 64 })
-      .notNull()
-      .default("Asia/Bangkok"),
+    timezone: varchar("timezone", { length: 64 }).notNull().default("Asia/Bangkok"),
     notifyEmail: boolean("notify_email").notNull().default(true),
     notifyProduct: boolean("notify_product").notNull().default(true),
     notifyUsageAlerts: boolean("notify_usage_alerts").notNull().default(true),
@@ -110,15 +108,7 @@ export const usageLogs = pgTable(
     count: integer("count").default(0),
   },
   (table) => [
-    unique("usage_logs_user_feature_period").on(
-      table.userId,
-      table.feature,
-      table.period,
-    ),
-    uniqueIndex("idx_usage_logs_user_feature").on(
-      table.userId,
-      table.feature,
-      table.period,
-    ),
+    unique("usage_logs_user_feature_period").on(table.userId, table.feature, table.period),
+    uniqueIndex("idx_usage_logs_user_feature").on(table.userId, table.feature, table.period),
   ],
 );
