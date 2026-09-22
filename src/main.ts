@@ -12,15 +12,20 @@ async function bootstrap() {
   app.useGlobalFilters(new AllExceptionsFilter());
   app.enableShutdownHooks();
 
-  const config = new DocumentBuilder()
-    .setTitle("AI Career SaaS API")
-    .setDescription("The AI Career SaaS API description")
-    .setVersion("1.0")
-    .addTag("AI Career SaaS")
-    .addBearerAuth()
-    .build();
-  const documentFactory = () => SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup("api/docs", app, documentFactory());
+  const swaggerEnabled =
+    process.env.NODE_ENV !== "production" || process.env.ENABLE_SWAGGER === "true";
+
+  if (swaggerEnabled) {
+    const config = new DocumentBuilder()
+      .setTitle("AI Career SaaS API")
+      .setDescription("The AI Career SaaS API description")
+      .setVersion("1.0")
+      .addTag("AI Career SaaS")
+      .addBearerAuth()
+      .build();
+    const documentFactory = () => SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup("api/docs", app, documentFactory());
+  }
 
   app.useGlobalPipes(
     new ValidationPipe({

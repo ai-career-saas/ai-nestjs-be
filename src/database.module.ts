@@ -18,6 +18,7 @@ const poolProvider = {
       ssl: {
         rejectUnauthorized: process.env.NODE_ENV === "production" ? true : false,
       },
+      max: Number(process.env.DB_POOL_MAX) || 10,
     }),
 };
 
