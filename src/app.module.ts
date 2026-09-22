@@ -8,6 +8,7 @@ import { PlansModule } from "./modules/plans/plans.module";
 import { BillingModule } from "./modules/billing/billing.module";
 import { UsageModule } from "./modules/usage/usage.module";
 import { ProxyModule } from "./modules/proxy/proxy.module";
+import { HealthModule } from "./modules/health/health.module";
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { ProxyModule } from "./modules/proxy/proxy.module";
     BillingModule,
     UsageModule,
     ProxyModule,
+    HealthModule,
   ],
 })
 export class AppModule {}
