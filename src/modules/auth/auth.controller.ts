@@ -1,4 +1,14 @@
-import { Body, Controller, Get, Post, Req, Res, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+} from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { RegisterDto, LoginDto, RefreshDto } from "./dto/request/auth.dto";
 import { JwtAuthGuard } from "./guards/jwt-auth.guard";
@@ -23,6 +33,7 @@ export class AuthController {
   }
 
   @Post("login")
+  @HttpCode(HttpStatus.OK)
   @ApiResponse({
     status: 200,
     description: "Login successful",
