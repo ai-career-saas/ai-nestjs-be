@@ -3,7 +3,10 @@ import { FileInterceptor } from "@nestjs/platform-express";
 import axios from "axios";
 import { Feature } from "../../common/decorators/feature.decorator";
 import { QuotaGuard } from "../../common/guards/quota.guard";
+import { CurrentUser } from "../../common/decorators/currentuser.decorator";
+import { UserPayload } from "../../common/interfaces/UserPayload.interface";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
+import { UsageService } from "../usage/usage.service";
 import FormData from "form-data";
 import { AnalyzeRequestDto } from "./dto/request/AnalyzeRequest.dto";
 import { AtsScoreRequestDto } from "./dto/request/AtsScoreRequest.dto";
@@ -58,6 +61,8 @@ async function forwardToFastAPI(
 @ApiBearerAuth()
 @Controller("ai")
 export class ProxyController {
+  constructor(private readonly usage: UsageService) {}
+
   // ── Career Analysis ──────────────────────────────────────────────
   @UseGuards(JwtAuthGuard, QuotaGuard)
   @Feature("analyze")
@@ -72,8 +77,12 @@ export class ProxyController {
   @ApiBody({
     type: AnalyzeRequestDto,
   })
-  async analyze(@Body() body: any, @UploadedFile() file?: Express.Multer.File) {
-    return forwardToFastAPI(
+  async analyze(
+    @Body() body: any,
+    @CurrentUser() user: UserPayload,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    const result = await forwardToFastAPI(
       "/analyze",
       {
         message: body.message,
@@ -82,6 +91,9 @@ export class ProxyController {
       },
       file,
     );
+    await this.usage.incrementUsage(user.userId, "analyze");
+
+    return result;
   }
 
   // ── Interview Question Generator ─────────────────────────────────
@@ -98,8 +110,12 @@ export class ProxyController {
   @ApiBody({
     type: GenerateInterviewRequestDto,
   })
-  async generateInterview(@Body() body: any, @UploadedFile() file?: Express.Multer.File) {
-    return forwardToFastAPI(
+  async generateInterview(
+    @Body() body: any,
+    @CurrentUser() user: UserPayload,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    const result = await forwardToFastAPI(
       "/interview/generate",
       {
         target_role: body.target_role,
@@ -108,6 +124,9 @@ export class ProxyController {
       },
       file,
     );
+    await this.usage.incrementUsage(user.userId, "interview_gen");
+
+    return result;
   }
 
   // ── ATS Resume Scoring ───────────────────────────────────────────

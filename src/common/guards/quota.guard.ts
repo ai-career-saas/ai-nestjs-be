@@ -26,7 +26,6 @@ export class QuotaGuard implements CanActivate {
       );
     }
 
-    await this.usage.incrementUsage(userId, feature);
     return true;
   }
 }
