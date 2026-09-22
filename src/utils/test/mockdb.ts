@@ -1,6 +1,6 @@
 import { PgDialect } from "drizzle-orm/pg-core";
 import type { SQL } from "drizzle-orm";
-import type { DrizzleDB } from "../database.module";
+import { DrizzleDB } from "../../database.module";
 
 export interface RecordedQuery {
   kind: "select" | "insert" | "update" | "delete";
