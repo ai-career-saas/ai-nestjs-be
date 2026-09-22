@@ -20,7 +20,7 @@ jobs:
       - name: Format
         run: bun run format
 
-  test:
+test:
   runs-on: ubuntu-latest
 
   steps:
